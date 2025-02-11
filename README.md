@@ -4,7 +4,7 @@ A dynamic, interactive starry background component for React applications. This 
 
 ## Version
 
-0.0.3
+0.0.4
 
 ## Features
 
