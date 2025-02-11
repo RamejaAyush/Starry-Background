@@ -121,19 +121,21 @@ const StarryBackground: React.FC = () => {
       }
     });
 
-    // Draw star connections
+    // Draw star connections using a double loop for unique pairs
     ctx.beginPath();
     ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
     ctx.lineWidth = 0.05;
-    stars.current.forEach((star1) => {
-      stars.current.forEach((star2) => {
+    for (let i = 0; i < stars.current.length; i++) {
+      const star1 = stars.current[i];
+      for (let j = i + 1; j < stars.current.length; j++) {
+        const star2 = stars.current[j];
         const distance = Math.hypot(star1.x - star2.x, star1.y - star2.y);
         if (distance < 50 && distance > 0) {
           ctx.moveTo(star1.x, star1.y);
           ctx.lineTo(star2.x, star2.y);
         }
-      });
-    });
+      }
+    }
     ctx.stroke();
 
     // Update and draw stars
