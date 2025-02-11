@@ -4,9 +4,9 @@ import React, { useRef, useEffect } from "react";
 import "../styles/StarryBackground.scss";
 import { IStar } from "../interfaces/star";
 import { createStar } from "../utils/createStar.util";
+import { CosmicConstants } from "../constants/cosmic.constants";
 
 const StarryBackground: React.FC = () => {
-  const starCount = 700;
   const stars = useRef<IStar[]>([]);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameId = useRef<number | undefined>(undefined);
@@ -18,15 +18,13 @@ const StarryBackground: React.FC = () => {
   const createRipple = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
     const x = Math.random() * canvas.width;
     const y = Math.random() * canvas.height;
-
     ripples.current.push({
       x,
       y,
-      radius: 1,
-      alpha: 1,
+      radius: CosmicConstants.RIPPLE_INITIAL_RADIUS,
+      alpha: CosmicConstants.RIPPLE_INITIAL_ALPHA,
     });
   };
 
@@ -45,7 +43,6 @@ const StarryBackground: React.FC = () => {
   const createNebula = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
     nebulae.current.push({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
@@ -62,21 +59,25 @@ const StarryBackground: React.FC = () => {
     if (!canvas) return;
     const canvasWidth = canvas.width;
     const canvasHeight = canvas.height;
-
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
     for (let i = nebulae.current.length - 1; i >= 0; i--) {
       const nebula = nebulae.current[i];
+      nebula.lifetime += CosmicConstants.NEBULA_LIFETIME_INCREMENT;
 
-      nebula.lifetime += 0.016;
-
-      if (nebula.fadeIn && nebula.lifetime < 4) {
-        nebula.alpha = Math.min(0.1, nebula.lifetime * 0.025);
-      } else if (nebula.lifetime > 9) {
-        nebula.alpha *= 0.99;
+      if (
+        nebula.fadeIn &&
+        nebula.lifetime < CosmicConstants.NEBULA_FADEIN_DURATION
+      ) {
+        nebula.alpha = Math.min(
+          CosmicConstants.NEBULA_MAX_ALPHA,
+          nebula.lifetime * CosmicConstants.NEBULA_FADEIN_ALPHA_MULTIPLIER
+        );
+      } else if (nebula.lifetime > CosmicConstants.NEBULA_FADEOUT_THRESHOLD) {
+        nebula.alpha *= CosmicConstants.NEBULA_FADEOUT_MULTIPLIER;
       }
 
-      nebula.hue = (nebula.hue + 0.2) % 360;
+      nebula.hue = (nebula.hue + CosmicConstants.NEBULA_HUE_INCREMENT) % 360;
 
       const gradient = ctx.createRadialGradient(
         nebula.x,
@@ -113,24 +114,27 @@ const StarryBackground: React.FC = () => {
       ctx.arc(ripple.x, ripple.y, ripple.radius, 0, 2 * Math.PI);
       ctx.stroke();
 
-      ripple.radius += 2;
-      ripple.alpha *= 0.98;
+      ripple.radius += CosmicConstants.RIPPLE_RADIUS_INCREMENT;
+      ripple.alpha *= CosmicConstants.RIPPLE_ALPHA_MULTIPLIER;
 
-      if (ripple.alpha < 0.01) {
+      if (ripple.alpha < CosmicConstants.RIPPLE_MIN_ALPHA) {
         ripples.current.splice(index, 1);
       }
     });
 
-    // Draw star connections using a double loop for unique pairs
     ctx.beginPath();
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
-    ctx.lineWidth = 0.05;
+    ctx.strokeStyle = CosmicConstants.STAR_CONNECTION_STROKE_STYLE;
+    ctx.lineWidth = CosmicConstants.STAR_CONNECTION_LINEWIDTH;
+
     for (let i = 0; i < stars.current.length; i++) {
       const star1 = stars.current[i];
       for (let j = i + 1; j < stars.current.length; j++) {
         const star2 = stars.current[j];
         const distance = Math.hypot(star1.x - star2.x, star1.y - star2.y);
-        if (distance < 50 && distance > 0) {
+        if (
+          distance < CosmicConstants.STAR_CONNECTION_DISTANCE &&
+          distance > 0
+        ) {
           ctx.moveTo(star1.x, star1.y);
           ctx.lineTo(star2.x, star2.y);
         }
@@ -138,11 +142,17 @@ const StarryBackground: React.FC = () => {
     }
     ctx.stroke();
 
-    // Update and draw stars
     stars.current.forEach((star) => {
-      const depthFactor = star.radius / 2; // Use radius to determine depth
-      star.x += Math.sin(Date.now() * 0.001 + star.y) * 0.015 * depthFactor;
-      star.y += Math.cos(Date.now() * 0.001 + star.x) * 0.015 * depthFactor;
+      const depthFactor =
+        star.radius / CosmicConstants.STAR_DEPTH_FACTOR_DIVISOR;
+      star.x +=
+        Math.sin(Date.now() * CosmicConstants.STAR_TIME_FACTOR + star.y) *
+        CosmicConstants.STAR_POSITION_UPDATE_FACTOR *
+        depthFactor;
+      star.y +=
+        Math.cos(Date.now() * CosmicConstants.STAR_TIME_FACTOR + star.x) *
+        CosmicConstants.STAR_POSITION_UPDATE_FACTOR *
+        depthFactor;
 
       if (star.x < 0) star.x = canvasWidth;
       if (star.x > canvasWidth) star.x = 0;
@@ -151,39 +161,57 @@ const StarryBackground: React.FC = () => {
 
       switch (star.type) {
         case "normal": {
-          star.radius += star.radiusChange * 0.05;
-          if (star.radius >= 2 || star.radius <= 0.5) {
+          star.radius +=
+            star.radiusChange *
+            CosmicConstants.STAR_NORMAL_RADIUS_CHANGE_MULTIPLIER;
+          if (
+            star.radius >= CosmicConstants.STAR_MAX_RADIUS ||
+            star.radius <= CosmicConstants.STAR_MIN_RADIUS
+          ) {
             star.radiusChange = -star.radiusChange;
           }
-          star.alpha = 0.6;
+          star.alpha = CosmicConstants.STAR_NORMAL_ALPHA;
           break;
         }
         case "blink": {
-          star.alpha += star.alphaChange * 0.025;
+          star.alpha +=
+            star.alphaChange *
+            CosmicConstants.STAR_BLINK_ALPHA_CHANGE_MULTIPLIER;
           if (star.alpha >= 1 || star.alpha <= 0.3) {
             star.alphaChange = -star.alphaChange;
           }
-          star.radius += star.radiusChange * 0.05;
-          if (star.radius >= 2 || star.radius <= 0.5) {
+          star.radius +=
+            star.radiusChange *
+            CosmicConstants.STAR_NORMAL_RADIUS_CHANGE_MULTIPLIER;
+          if (
+            star.radius >= CosmicConstants.STAR_MAX_RADIUS ||
+            star.radius <= CosmicConstants.STAR_MIN_RADIUS
+          ) {
             star.radiusChange = -star.radiusChange;
           }
           break;
         }
         case "lifeCycle": {
-          star.lifeCycleTime = (star.lifeCycleTime || 0) + 0.05;
-          const cycleDuration = star.cycleDuration || 1000;
-          const t = star.lifeCycleTime / cycleDuration;
+          star.lifeCycleTime =
+            (star.lifeCycleTime ?? 0) +
+            CosmicConstants.STARCYCLE_LIFETIME_INCREMENT;
+          const cycleDuration =
+            star.cycleDuration || CosmicConstants.STARCYCLE_DEFAULT_DURATION;
+          const t = star.lifeCycleTime! / cycleDuration;
           if (star.baseRadius === undefined) {
             star.baseRadius = star.radius;
           }
-          if (t < 0.4) {
-            star.alpha = (t / 0.4) * 0.6;
+          if (t < CosmicConstants.STARCYCLE_FADEIN_PERCENT) {
+            star.alpha =
+              (t / CosmicConstants.STARCYCLE_FADEIN_PERCENT) *
+              CosmicConstants.STAR_NORMAL_ALPHA;
             star.radius = star.baseRadius;
           } else if (t < 0.6) {
             star.alpha = 1;
-            star.radius = star.baseRadius * 1.02;
+            star.radius =
+              star.baseRadius * CosmicConstants.STARCYCLE_BURST_MULTIPLIER;
           } else if (t < 1) {
-            star.alpha = 1 - (t - 0.6) / 0.4;
+            star.alpha = 1 - (t - 0.6) / (1 - 0.6);
             star.radius = star.baseRadius;
           } else {
             star.lifeCycleTime = 0;
@@ -236,7 +264,7 @@ const StarryBackground: React.FC = () => {
     };
     setCanvasSize();
 
-    stars.current = Array.from({ length: starCount }, () =>
+    stars.current = Array.from({ length: CosmicConstants.STAR_COUNT }, () =>
       createStar(canvas.width, canvas.height)
     );
 
@@ -247,7 +275,7 @@ const StarryBackground: React.FC = () => {
 
     const handleResize = () => {
       setCanvasSize();
-      stars.current = Array.from({ length: starCount }, () =>
+      stars.current = Array.from({ length: CosmicConstants.STAR_COUNT }, () =>
         createStar(canvas.width, canvas.height)
       );
       ripples.current = [];
