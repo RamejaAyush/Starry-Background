@@ -46,10 +46,10 @@ const StarryBackground: React.FC = () => {
     nebulae.current.push({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
-      radius: Math.random() * 200,
-      alpha: 0,
-      hue: Math.random() * 60 + 200,
-      lifetime: 0,
+      radius: Math.random() * 400,
+      alpha: 1,
+      hue: Math.random() * 60 + 400,
+      lifetime: 2,
       fadeIn: true,
     });
   };
@@ -270,7 +270,7 @@ const StarryBackground: React.FC = () => {
 
     animate(ctx);
 
-    const rippleInterval = setInterval(createRipple, 5000);
+    const rippleInterval = setInterval(createRipple, 8000);
     const nebulaInterval = setInterval(createNebula, 15000);
 
     const handleResize = () => {
