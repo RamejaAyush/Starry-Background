@@ -61,7 +61,6 @@ const StarryBackground: React.FC = () => {
     const canvasHeight = canvas.height;
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
-    // Update and draw nebulae in a reverse loop
     for (let i = nebulae.current.length - 1; i >= 0; i--) {
       const nebula = nebulae.current[i];
       nebula.lifetime += CosmicConstants.NEBULA_LIFETIME_INCREMENT;
@@ -108,7 +107,6 @@ const StarryBackground: React.FC = () => {
       }
     }
 
-    // Draw ripples
     ripples.current.forEach((ripple, index) => {
       ctx.beginPath();
       ctx.strokeStyle = `rgba(255, 255, 255, ${ripple.alpha})`;
@@ -124,10 +122,10 @@ const StarryBackground: React.FC = () => {
       }
     });
 
-    // Draw star connections using a double loop for unique pairs
     ctx.beginPath();
     ctx.strokeStyle = CosmicConstants.STAR_CONNECTION_STROKE_STYLE;
     ctx.lineWidth = CosmicConstants.STAR_CONNECTION_LINEWIDTH;
+
     for (let i = 0; i < stars.current.length; i++) {
       const star1 = stars.current[i];
       for (let j = i + 1; j < stars.current.length; j++) {

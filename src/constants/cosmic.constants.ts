@@ -2,13 +2,13 @@ export const CosmicConstants = {
   STAR_COUNT: 700,
 
   // Nebula Constants
-  NEBULA_LIFETIME_INCREMENT: 0.016, // Increment per frame for nebula lifetime
-  NEBULA_FADEIN_DURATION: 4, // Duration (in time units) for fade-in phase
-  NEBULA_FADEIN_ALPHA_MULTIPLIER: 0.025, // Multiplier for alpha during fade-in
-  NEBULA_MAX_ALPHA: 0.1, // Maximum alpha during fade-in
-  NEBULA_FADEOUT_THRESHOLD: 9, // Time threshold after which fade-out starts
-  NEBULA_FADEOUT_MULTIPLIER: 0.99, // Multiplier for alpha during fade-out
-  NEBULA_HUE_INCREMENT: 0.2, // Increment for nebula hue per frame
+  NEBULA_LIFETIME_INCREMENT: 0.016,
+  NEBULA_FADEIN_DURATION: 4,
+  NEBULA_FADEIN_ALPHA_MULTIPLIER: 0.025,
+  NEBULA_MAX_ALPHA: 0.1,
+  NEBULA_FADEOUT_THRESHOLD: 9,
+  NEBULA_FADEOUT_MULTIPLIER: 0.99,
+  NEBULA_HUE_INCREMENT: 0.2,
 
   // Ripple Constants
   RIPPLE_INITIAL_RADIUS: 1,
