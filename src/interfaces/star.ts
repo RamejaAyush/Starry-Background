@@ -8,5 +8,5 @@ export interface IStar {
   type: "normal" | "blink" | "lifeCycle";
   lifeCycleTime?: number;
   cycleDuration?: number;
-  baseRadius?: number; // new property to store the original radius
+  baseRadius?: number;
 }
